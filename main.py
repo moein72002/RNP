@@ -335,9 +335,15 @@ def main(args):
             cl_test_loss, cl_test_acc)
 
         if train_acc <= args.clean_threshold:
-
             print(f"epoch: {epoch}")
             print(f"clean_acc: {cl_test_acc}")
+
+            file_path = os.path.join(args.output_weight,
+                                     f'RNP_unlearned_model{args.unlearn_file_suffix}.pt')
+
+            save_checkpoint({
+                'model': unlearned_net.state_dict()
+            }, file_path)
             break
 
     defense_loader = DataLoader(defense_data, batch_size=len(defense_data), shuffle=True)
