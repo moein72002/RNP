@@ -8,7 +8,7 @@ import torch.nn as nn
 import pandas as pd
 from collections import OrderedDict
 import models
-from datasets.poison_tool_cifar import get_backdoor_loader, get_test_loader, get_train_loader
+from data.poison_tool_cifar import get_test_loader, get_train_loader
 
 if torch.cuda.is_available():
     torch.backends.cudnn.enabled = True
@@ -191,7 +191,7 @@ def main(args):
 
     logger.info('----------- Data Initialization --------------')
     defense_data_loader = get_train_loader(args)
-    clean_test_loader, bad_test_loader = get_test_loader(args)
+    clean_test_loader = get_test_loader(args)
 
     logger.info('----------- Backdoor Model Initialization --------------')
     state_dict = torch.load(args.backdoor_model_path, map_location=device)
@@ -211,24 +211,25 @@ def main(args):
         train_loss, train_acc = train_step_unlearning(args=args, model=net, criterion=criterion, optimizer=optimizer,
                                       data_loader=defense_data_loader)
         cl_test_loss, cl_test_acc = test(model=net, criterion=criterion, data_loader=clean_test_loader)
-        po_test_loss, po_test_acc = test(model=net, criterion=criterion, data_loader=bad_test_loader)
         scheduler.step()
         end = time.time()
         logger.info(
-            '%d \t %.3f \t %.1f \t %.4f \t %.4f \t %.4f \t %.4f \t %.4f \t %.4f',
-            epoch, lr, end - start, train_loss, train_acc, po_test_loss, po_test_acc,
+            '%d \t %.3f \t %.1f \t %.4f \t %.4f \t %.4f \t %.4f',
+            epoch, lr, end - start, train_loss, train_acc,
             cl_test_loss, cl_test_acc)
 
         if train_acc <= args.clean_threshold:
             # save the last checkpoint
-            file_path = os.path.join(args.output_weight, f'unlearned_model_last.tar')
+            file_path = os.path.join(args.output_weight, f'unlearned_model_last.pth')
             # torch.save(net.state_dict(), os.path.join(args.output_dir, 'unlearned_model_last.tar'))
+
+            print(f"epoch: {epoch}")
+            print(f"clean_acc: {cl_test_acc}")
+
             save_checkpoint({
                 'epoch': epoch,
                 'state_dict': net.state_dict(),
                 'clean_acc': cl_test_acc,
-                'bad_acc': po_test_acc,
-                'optimizer': optimizer.state_dict(),
             }, file_path)
             break
 
