@@ -343,7 +343,7 @@ def main(args):
     defense_loader = DataLoader(defense_data, batch_size=len(defense_data), shuffle=True)
 
     for inputs, targets in defense_loader:
-        inputs, targets = inputs.to(args.device), targets.to(args.device)
+        inputs, targets = inputs.to(device), targets.to(device)
         print(f"inputs.size: {inputs.size}")
         break  # Assuming we use only one batch for the example
 
