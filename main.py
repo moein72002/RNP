@@ -396,6 +396,7 @@ if __name__ == '__main__':
     parser.add_argument('--arch', type=str, default='resnet18',
                         choices=['resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152', 'MobileNetV2',
                                  'vgg19_bn'])
+    parser.add_argument('--prune_all_layers', type=bool, default=True)
     parser.add_argument('--schedule', type=int, nargs='+', default=[10, 20],
                         help='Decrease learning rate at these epochs.')
     parser.add_argument('--dataset', type=str, default='CIFAR10', help='name of image dataset')
