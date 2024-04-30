@@ -116,6 +116,9 @@ def get_test_loader(args):
     # tf_test = transforms.Compose([transforms.ToTensor(),
     #                               transforms.Normalize(MEAN_CIFAR10, STD_CIFAR10)
     #                               ])
+    if args.dataset == "CIFAR10":
+        args.input_height = 32
+        args.input_width = 32
     tf_test = get_transform(args.dataset, *([args.input_height, args.input_width]), train=False)
     if (args.dataset == 'CIFAR10'):
         testset = datasets.CIFAR10(root='data/CIFAR10', train=False, download=True)
