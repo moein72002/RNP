@@ -78,20 +78,14 @@ def get_test_loader(args):
         raise Exception('Invalid dataset')
 
     test_data_clean = DatasetBD(args, full_dataset=testset, inject_portion=0, transform=tf_test, mode='test')
-    test_data_bad = DatasetBD(args, full_dataset=testset, inject_portion=1, transform=tf_test, mode='test')
 
     # (apart from label 0) bad test data
     test_clean_loader = DataLoader(dataset=test_data_clean,
                                        batch_size=args.batch_size,
                                        shuffle=False,
                                        )
-    # all clean test data
-    test_bad_loader = DataLoader(dataset=test_data_bad,
-                                       batch_size=args.batch_size,
-                                       shuffle=False,
-                                       )
 
-    return test_clean_loader, test_bad_loader
+    return test_clean_loader
 
 
 def get_backdoor_loader(args):

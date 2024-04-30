@@ -81,7 +81,7 @@ def main(args):
 
     logger.info('----------- Backdoored Data Initialization --------------')
     _, backdoor_data_loader = get_backdoor_loader(args)
-    clean_test_loader, bad_test_loader = get_test_loader(args)
+    clean_test_loader = get_test_loader(args)
 
     logger.info('----------- Backdoor Model Initialization --------------')
     net = getattr(models, args.arch)(num_classes=10, norm_layer=None)
@@ -99,12 +99,11 @@ def main(args):
         train_loss, train_acc = train_step(args=args, model=net, criterion=criterion, optimizer=optimizer,
                                       data_loader=backdoor_data_loader)
         cl_test_loss, cl_test_acc = test(model=net, criterion=criterion, data_loader=clean_test_loader)
-        po_test_loss, po_test_acc = test(model=net, criterion=criterion, data_loader=bad_test_loader)
         scheduler.step()
         end = time.time()
         logger.info(
-            '%d \t %.3f \t %.1f \t %.4f \t %.4f \t %.4f \t %.4f \t %.4f \t %.4f',
-            epoch, lr, end - start, train_loss, train_acc, po_test_loss, po_test_acc,
+            '%d \t %.3f \t %.1f \t %.4f \t %.4f \t %.4f \t %.4f',
+            epoch, lr, end - start, train_loss, train_acc,
             cl_test_loss, cl_test_acc)
 
         if epoch % args.interval == 0:
@@ -114,7 +113,6 @@ def main(args):
                 'epoch': epoch,
                 'state_dict': net.state_dict(),
                 'clean_acc': cl_test_acc,
-                'bad_acc': po_test_acc,
                 'optimizer': optimizer.state_dict(),
             }, file_path)
 
