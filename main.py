@@ -194,7 +194,7 @@ def main(args):
     clean_test_loader = get_test_loader(args)
 
     logger.info('----------- Backdoor Model Initialization --------------')
-    state_dict = torch.load(args.backdoor_model_path, map_location=device)
+    state_dict = torch.load(args.backdoor_model_path, map_location=device)["model"]
     net = getattr(models, args.arch)(num_classes=10, norm_layer=None)
     load_state_dict(net, orig_state_dict=state_dict)
     net = net.to(device)
@@ -220,7 +220,7 @@ def main(args):
 
         if train_acc <= args.clean_threshold:
             # save the last checkpoint
-            file_path = os.path.join(args.output_weight, f'unlearned_model_last.pth')
+            file_path = os.path.join(args.output_weight, f'unlearned_model_last{args.unlearn_file_suffix}.pt')
             # torch.save(net.state_dict(), os.path.join(args.output_dir, 'unlearned_model_last.tar'))
 
             print(f"epoch: {epoch}")
@@ -245,6 +245,7 @@ if __name__ == '__main__':
     parser.add_argument('--save-every', type=int, default=5, help='save checkpoints every few epochs')
     parser.add_argument('--log_root', type=str, default='logs/', help='logs are saved here')
     parser.add_argument('--output_weight', type=str, default='weights/')
+    parser.add_argument('--unlearn_file_suffix', type=str, default='')
     parser.add_argument('--backdoor_model_path', type=str,
                         default='weights/ResNet18-ResNet-BadNets-target0-portion0.1-epoch80.tar',
                         help='path of backdoored model')
