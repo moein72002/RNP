@@ -371,7 +371,7 @@ def main(args):
         print(f"prune_ratio: {prune_ratio}")
         print(f"clean_acc: {cl_test_acc}")
 
-        file_path = os.path.join(args.output_weight, f'RNP_unlearn_signal_pruned_model{args.unlearn_file_suffix}.pt')
+        file_path = os.path.join(args.output_weight, f'RNP_unlearn_signal_pruned_model{args.unlearn_file_suffix}_prune_ratio_{prune_ratio}.pt')
 
         save_checkpoint({
             'model': pruned_model.state_dict(),
