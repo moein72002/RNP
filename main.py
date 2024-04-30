@@ -17,11 +17,11 @@ if torch.cuda.is_available():
 else:
     device = torch.device('cpu')
 
-seed = 98
-torch.backends.cudnn.deterministic = True
-torch.backends.cudnn.benchmark = False
-torch.manual_seed(seed)
-np.random.seed(seed)
+# seed = 98
+# torch.backends.cudnn.deterministic = True
+# torch.backends.cudnn.benchmark = False
+# torch.manual_seed(seed)
+# np.random.seed(seed)
 
 
 def train_step_unlearning(args, model, criterion, optimizer, data_loader):
