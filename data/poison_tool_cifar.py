@@ -47,15 +47,59 @@ def split_dataset(dataset, frac=0.1, perm=None):
 
     return train_set, split_set
 
+def get_dataset_normalization(dataset_name):
+    # idea : given name, return the default normalization of images in the dataset
+    if dataset_name == "CIFAR10":
+        # from wanet
+        dataset_normalization = (transforms.Normalize([0.4914, 0.4822, 0.4465], [0.247, 0.243, 0.261]))
+    elif dataset_name == 'cifar100':
+        '''get from https://gist.github.com/weiaicunzai/e623931921efefd4c331622c344d8151'''
+        dataset_normalization = (transforms.Normalize([0.5071, 0.4865, 0.4409], [0.2673, 0.2564, 0.2762]))
+    elif dataset_name in ["mnist", "fmnist"]:
+        dataset_normalization = (transforms.Normalize([0.5], [0.5]))
+    elif dataset_name == 'tiny':
+        dataset_normalization = (transforms.Normalize([0.4802, 0.4481, 0.3975], [0.2302, 0.2265, 0.2262]))
+    elif dataset_name == "gtsrb" or dataset_name == "celeba":
+        dataset_normalization = transforms.Normalize([0, 0, 0], [1, 1, 1])
+    elif dataset_name == 'imagenet':
+        dataset_normalization = (
+            transforms.Normalize(
+                mean=[0.485, 0.456, 0.406],
+                std=[0.229, 0.224, 0.225],
+            )
+        )
+    else:
+        raise Exception("Invalid Dataset")
+    return dataset_normalization
+
+def get_transform(dataset_name, input_height, input_width, train=True, random_crop_padding=4):
+    # idea : given name, return the final implememnt transforms for the dataset
+    transforms_list = []
+    transforms_list.append(transforms.Resize((input_height, input_width)))
+    if train:
+        transforms_list.append(transforms.RandomCrop((input_height, input_width), padding=random_crop_padding))
+        # transforms_list.append(transforms.RandomRotation(10))
+        if dataset_name == "CIFAR10":
+            transforms_list.append(transforms.RandomHorizontalFlip())
+
+    transforms_list.append(transforms.ToTensor())
+    transforms_list.append(get_dataset_normalization(dataset_name))
+    return transforms.Compose(transforms_list)
+
 def get_train_loader(args):
     print('==> Preparing train data..')
-    tf_train = transforms.Compose([
-        transforms.RandomCrop(32, padding=4),
-        # transforms.RandomRotation(3),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        transforms.Normalize(MEAN_CIFAR10, STD_CIFAR10)
-    ])
+    # tf_train = transforms.Compose([
+    #     transforms.RandomCrop(32, padding=4),
+    #     # transforms.RandomRotation(3),
+    #     transforms.RandomHorizontalFlip(),
+    #     transforms.ToTensor(),
+    #     transforms.Normalize(MEAN_CIFAR10, STD_CIFAR10)
+    # ])
+    if args.dataset == "CIFAR10":
+        args.input_height = 32
+        args.input_width = 32
+
+    tf_train = get_transform(args.dataset, *([args.input_height, args.input_width]), train=True)
 
     if (args.dataset == 'CIFAR10'):
         trainset = datasets.CIFAR10(root='data/CIFAR10', train=True, download=True)
@@ -65,13 +109,14 @@ def get_train_loader(args):
     train_data = DatasetCL(args, full_dataset=trainset, transform=tf_train)
     train_loader = DataLoader(train_data, batch_size=args.batch_size, shuffle=True)
 
-    return train_loader
+    return train_data, train_loader
 
 def get_test_loader(args):
     print('==> Preparing test data..')
-    tf_test = transforms.Compose([transforms.ToTensor(),
-                                  transforms.Normalize(MEAN_CIFAR10, STD_CIFAR10)
-                                  ])
+    # tf_test = transforms.Compose([transforms.ToTensor(),
+    #                               transforms.Normalize(MEAN_CIFAR10, STD_CIFAR10)
+    #                               ])
+    tf_test = get_transform(args.dataset, *([args.input_height, args.input_width]), train=False)
     if (args.dataset == 'CIFAR10'):
         testset = datasets.CIFAR10(root='data/CIFAR10', train=False, download=True)
     else:
