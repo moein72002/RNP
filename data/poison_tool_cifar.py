@@ -74,7 +74,7 @@ def get_dataset_normalization(dataset_name):
 
 def get_transform(dataset_name, input_height, input_width, train=True, random_crop_padding=4):
     # idea : given name, return the final implememnt transforms for the dataset
-    transforms_list = []
+    transforms_list = [transforms.ToPILImage()]
     transforms_list.append(transforms.Resize((input_height, input_width)))
     if train:
         transforms_list.append(transforms.RandomCrop((input_height, input_width), padding=random_crop_padding))
