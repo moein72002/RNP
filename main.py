@@ -195,7 +195,11 @@ def main(args):
 
     logger.info('----------- Backdoor Model Initialization --------------')
     state_dict = torch.load(args.backdoor_model_path, map_location=device)["model"]
-    net = getattr(models, args.arch)(num_classes=10, norm_layer=None)
+    if args.arch == "resnet18":
+        from torchvision.models.resnet import resnet18
+        net = resnet18(num_classes=10, norm_layer=None)
+    else:
+        net = getattr(models, args.arch)(num_classes=10, norm_layer=None)
     load_state_dict(net, orig_state_dict=state_dict)
     net = net.to(device)
 
